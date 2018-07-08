@@ -3,8 +3,9 @@
 
 static Window *s_main_window;
 
-static TextLayer *s_day_layer, *s_date_layer, *s_temperature_layer /*, *s_temperatureSave_layer*/, *s_battery_layer;
+static TextLayer *s_day_layer, *s_date_layer, *s_temperature_layer, *s_battery_layer;
 static int s_battery_level;
+//static int s_temperature_level;
 
 // struct for clay settings (see index.h)
 ClaySettings settings;
@@ -20,7 +21,11 @@ static void load_clay_default_settings(void) {
 /*
 static void display_temperature() {
   if(settings.ShowTemperature) {
-    text_layer_set_text(s_temperature_layer, text_layer_get_text(s_temperatureSave_layer));
+    s_temperature_level = settings.TemperatureLevel;
+    
+    static char s_temperature[5]; // max. 3 digits
+    snprintf(s_temperature, sizeof(s_temperature), "%u", s_temperature_level);
+    text_layer_set_text(s_temperature_layer, s_temperature);
   }
   else
     text_layer_set_text(s_temperature_layer, "");
@@ -41,7 +46,7 @@ static void display_battery(BatteryChargeState state) {
 }
 
 static void update_display() {
-  display_battery(battery_state_service_peek()); 
+  display_battery(battery_state_service_peek());
   //display_temperature();
 }
 
@@ -56,7 +61,8 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
   // Read weather data
   Tuple *WeatherTemperature_t = dict_find(iter, MESSAGE_KEY_WeatherTemperature);
   if(WeatherTemperature_t) {
-    text_layer_set_text(s_temperature_layer, WeatherTemperature_t->value->cstring);    
+    //settings.TemperatureLevel = WeatherTemperature_t->value->int32;
+    text_layer_set_text(s_temperature_layer, WeatherTemperature_t->value->cstring);
   }
 
   // Read clay preferences
@@ -64,12 +70,12 @@ static void inbox_received_callback(DictionaryIterator *iter, void *context) {
   if(ShowBattery_t) {
     settings.ShowBattery = ShowBattery_t->value->int32 == 1;
   }
-  
+/*
   Tuple *ShowTemperature_t = dict_find(iter, MESSAGE_KEY_ShowTemperature);
   if(ShowTemperature_t) {
     settings.ShowTemperature = ShowTemperature_t->value->int32 == 1;
   }
-  
+*/  
   save_clay_settings();
 }
 
@@ -282,6 +288,7 @@ static void main_window_unload(Window *window) {
   text_layer_destroy(s_day_layer);
   text_layer_destroy(s_date_layer);
   text_layer_destroy(s_temperature_layer);
+  //text_layer_destroy(s_temperatureSave_layer);
   text_layer_destroy(s_battery_layer);
 }
 

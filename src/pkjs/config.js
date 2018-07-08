@@ -39,7 +39,7 @@ module.exports = [
         "type": "toggle",
         "messageKey": "ShowTemperature",
         "label": "Temperatur anzeigen",
-        "defaultValue": false
+        "defaultValue": true
       },  /*
       {
         "type": "text",
