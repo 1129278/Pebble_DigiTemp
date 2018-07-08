@@ -1,57 +1,88 @@
 #include <pebble.h>
+#include "index.h"
 
 static Window *s_main_window;
 
-static TextLayer *s_day_layer, *s_date_layer, *s_temperature_layer, *s_battery_layer;
+static TextLayer *s_day_layer, *s_date_layer, *s_temperature_layer /*, *s_temperatureSave_layer*/, *s_battery_layer;
 static int s_battery_level;
 
+// struct for clay settings (see index.h)
+ClaySettings settings;
+
 static AppSync s_sync;
-static uint8_t s_sync_buffer[64];
 
-/*
-static void prv_inbox_received_handler(DictionaryIterator *iter, void *context) {
+static void load_clay_default_settings(void) {
+  settings.ShowBattery = true;
+  settings.ShowTemperature = true;
   
-  Tuple *WeatherTemperature_t = dict_find(iter, MESSAGE_KEY_WeatherTemperature);
-  if(WeatherTemperature_t) {
-    text_layer_set_text(s_temperature_layer, WeatherTemperature_t->value->cstring);
+  persist_read_data(SETTINGS_KEY, &settings, sizeof(settings));
+}
+/*
+static void display_temperature() {
+  if(settings.ShowTemperature) {
+    text_layer_set_text(s_temperature_layer, text_layer_get_text(s_temperatureSave_layer));
   }
-
-  // Read boolean preferences
-  Tuple *ShowBattery_t = dict_find(iter, MESSAGE_KEY_ShowBattery);
-  if(ShowBattery_t) {
-    bool ShowBattery = ShowBattery_t->value->int32 == 1;
-  }
+  else
+    text_layer_set_text(s_temperature_layer, "");
 }
 */
 
-static void sync_error_callback(DictionaryResult dict_error, AppMessageResult app_message_error, void *context) {
-  APP_LOG(APP_LOG_LEVEL_DEBUG, "App Message Sync Error: %d", app_message_error);
+static void display_battery(BatteryChargeState state) {
+  if(settings.ShowBattery) {
+    // Record the new battery level
+    s_battery_level = state.charge_percent;
+    
+    static char s_battery[4]; // max. 3 digits
+    snprintf(s_battery, sizeof(s_battery), "%u", s_battery_level);
+    text_layer_set_text(s_battery_layer, s_battery);
+  }
+  else
+    text_layer_set_text(s_battery_layer, "");
 }
 
-static void sync_tuple_changed_callback(const uint32_t key, const Tuple* new_tuple, const Tuple* old_tuple, void* context) {
- // switch (key) {
-
-   // case MESSAGE_KEY_WEATHER_TEMPERATURE_KEY:
-      // App Sync keeps new_tuple in s_sync_buffer, so we may use it directly
-      text_layer_set_text(s_temperature_layer, new_tuple->value->cstring);
-     // break;
-  //}
+static void update_display() {
+  display_battery(battery_state_service_peek()); 
+  //display_temperature();
 }
 
-static void request_weather(void) {
-  DictionaryIterator *iter;
-  app_message_outbox_begin(&iter);
+// Save the settings to persistent storage
+static void save_clay_settings() {
+  persist_write_data(SETTINGS_KEY, &settings, sizeof(settings));
+  update_display();
+}
 
-  if (!iter) {
-    // Error creating outbound message
-    return;
+static void inbox_received_callback(DictionaryIterator *iter, void *context) {
+  
+  // Read weather data
+  Tuple *WeatherTemperature_t = dict_find(iter, MESSAGE_KEY_WeatherTemperature);
+  if(WeatherTemperature_t) {
+    text_layer_set_text(s_temperature_layer, WeatherTemperature_t->value->cstring);    
   }
 
-  int value = 1;
-  dict_write_int(iter, 1, &value, sizeof(int), true);
-  dict_write_end(iter);
+  // Read clay preferences
+  Tuple *ShowBattery_t = dict_find(iter, MESSAGE_KEY_ShowBattery);
+  if(ShowBattery_t) {
+    settings.ShowBattery = ShowBattery_t->value->int32 == 1;
+  }
+  
+  Tuple *ShowTemperature_t = dict_find(iter, MESSAGE_KEY_ShowTemperature);
+  if(ShowTemperature_t) {
+    settings.ShowTemperature = ShowTemperature_t->value->int32 == 1;
+  }
+  
+  save_clay_settings();
+}
 
-  app_message_outbox_send();
+static void inbox_dropped_callback(AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Message dropped!");
+}
+
+static void outbox_failed_callback(DictionaryIterator *iterator, AppMessageResult reason, void *context) {
+  APP_LOG(APP_LOG_LEVEL_ERROR, "Outbox send failed!");
+}
+
+static void outbox_sent_callback(DictionaryIterator *iterator, void *context) {
+  APP_LOG(APP_LOG_LEVEL_INFO, "Outbox send success!");
 }
 
 // Slot on-screen layout:
@@ -190,15 +221,6 @@ static void display_date(struct tm *tick_time) {
   text_layer_set_text(s_date_layer, s_date);
 }
 
-static void display_battery(BatteryChargeState state) {
-  // Record the new battery level
-  s_battery_level = state.charge_percent;
-  
-  static char s_battery[4]; // max. 3 digits
-  snprintf(s_battery, sizeof(s_battery), "%u", s_battery_level);
-  text_layer_set_text(s_battery_layer, s_battery);
-}
-
 static void handle_minute_tick(struct tm *tick_time, TimeUnits units_changed) {
   display_time(tick_time);
   display_day(tick_time);
@@ -237,12 +259,8 @@ static void main_window_load(Window *window) {
   text_layer_set_background_color(s_battery_layer, GColorClear);
   text_layer_set_font(s_battery_layer, fonts_load_custom_font(resource_get_handle(RESOURCE_ID_FONT_INTERSTATE_EXTRA_LIGHT_14)));
   text_layer_set_text_alignment(s_battery_layer, GTextAlignmentLeft);
-  
   // Register for battery level updates
   battery_state_service_subscribe(display_battery);
-  // Ensure battery level is displayed from the start
-  display_battery(battery_state_service_peek());
-  
   layer_add_child(window_layer, text_layer_get_layer(s_battery_layer));
   
   // Temperature
@@ -253,15 +271,8 @@ static void main_window_load(Window *window) {
   text_layer_set_text_alignment(s_temperature_layer, GTextAlignmentLeft);
   layer_add_child(window_layer, text_layer_get_layer(s_temperature_layer));
   
-  Tuplet initial_values[] = {
-    TupletCString(MESSAGE_KEY_WeatherTemperature, ""),
-  };
-
-  app_sync_init(&s_sync, s_sync_buffer, sizeof(s_sync_buffer),
-      initial_values, ARRAY_LENGTH(initial_values),
-      sync_tuple_changed_callback, sync_error_callback, NULL);
-
-  request_weather();
+  // Ensure clay settings are correctly displayed from the start
+  update_display();
 }
 
 static void main_window_unload(Window *window) {
@@ -283,8 +294,15 @@ static void init(void) {
   });
   window_stack_push(s_main_window, true);
   
-  // Open AppMessage connection
-  //app_message_register_inbox_received(prv_inbox_received_handler);
+  // load default clay values
+  load_clay_default_settings();
+  
+  // Register callbacks
+  app_message_register_inbox_received(inbox_received_callback);
+  app_message_register_inbox_dropped(inbox_dropped_callback);
+  app_message_register_outbox_failed(outbox_failed_callback);
+  app_message_register_outbox_sent(outbox_sent_callback);
+  // Open AppMessage
   app_message_open(128, 128);
 }
 
