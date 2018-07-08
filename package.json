@@ -1,0 +1,183 @@
+{
+    "author": "Benni",
+    "dependencies": {
+        "pebble-clay": "^1.0.4"
+    },
+    "keywords": [],
+    "name": "digitemp",
+    "pebble": {
+        "capabilities": [
+            "configurable"
+        ],
+        "displayName": "DigiTemp",
+        "enableMultiJS": true,
+        "messageKeys": [
+            "WeatherTemperature",
+            "ShowBattery",
+            "ShowTemperature"
+        ],
+        "projectType": "native",
+        "resources": {
+            "media": [
+                {
+                    "file": "images/DigiTemp.png",
+                    "menuIcon": true,
+                    "name": "IMAGE_DIGITEMP",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "characterRegex": "[ -~]",
+                    "file": "fonts/InterstateRegular.ttf",
+                    "name": "FONT_INTERSTATE_REGULAR_18",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[ -~]",
+                    "file": "fonts/InterstateThin.ttf",
+                    "name": "FONT_INTERSTATE_THIN_18",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "characterRegex": "[ -~]",
+                    "file": "fonts/InterstateExtraLight.ttf",
+                    "name": "FONT_INTERSTATE_EXTRA_LIGHT_14",
+                    "targetPlatforms": null,
+                    "type": "font"
+                },
+                {
+                    "file": "images/num_2_regular.png",
+                    "name": "IMAGE_NUM_2_REGULAR",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_9_regular.png",
+                    "name": "IMAGE_NUM_9_REGULAR",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_8_regular.png",
+                    "name": "IMAGE_NUM_8_REGULAR",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_7_regular.png",
+                    "name": "IMAGE_NUM_7_REGULAR",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_6_regular.png",
+                    "name": "IMAGE_NUM_6_REGULAR",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_5_regular.png",
+                    "name": "IMAGE_NUM_5_REGULAR",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_4_regular.png",
+                    "name": "IMAGE_NUM_4_REGULAR",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_3_regular.png",
+                    "name": "IMAGE_NUM_3_REGULAR",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_1_regular.png",
+                    "name": "IMAGE_NUM_1_REGULAR",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_0_regular.png",
+                    "name": "IMAGE_NUM_0_REGULAR",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_9_thin.png",
+                    "name": "IMAGE_NUM_9_THIN",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_8_thin.png",
+                    "name": "IMAGE_NUM_8_THIN",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_7_thin.png",
+                    "name": "IMAGE_NUM_7_THIN",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_6_thin.png",
+                    "name": "IMAGE_NUM_6_THIN",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_5_thin.png",
+                    "name": "IMAGE_NUM_5_THIN",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_4_thin.png",
+                    "name": "IMAGE_NUM_4_THIN",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_3_thin.png",
+                    "name": "IMAGE_NUM_3_THIN",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_2_thin.png",
+                    "name": "IMAGE_NUM_2_THIN",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_1_thin.png",
+                    "name": "IMAGE_NUM_1_THIN",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                },
+                {
+                    "file": "images/num_0_thin.png",
+                    "name": "IMAGE_NUM_0_THIN",
+                    "targetPlatforms": null,
+                    "type": "bitmap"
+                }
+            ]
+        },
+        "sdkVersion": "3",
+        "targetPlatforms": [
+            "aplite",
+            "basalt"
+        ],
+        "uuid": "1b18a556-db30-418e-8a29-0a3a6160f1bf",
+        "watchapp": {
+            "watchface": true
+        }
+    },
+    "version": "1.0.0"
+}
